@@ -3,36 +3,37 @@ package ru.nobirds.k2048
 import kotlin.support.AbstractIterator
 import java.util.ArrayList
 
-public class Matrix(val size:Int, val builder:(Int, Int)->Int) {
+public class Matrix(val size: Int, val builder: (Int, Int) -> Int) {
 
-    private val matrix = Array<IntArray>(size) { x -> intArrayFor(size) { y -> builder(x, y) } }
+    private val matrix = Array<IntArray> (size) { x -> intArrayFor(size) { y -> builder(x, y) } }
 
     public val indices:IntRange = 0..size-1
-    public val invertIndices:IntProgression = (size-1).downTo(0)
 
-    public fun column(index:Int):Vector = ColVector(this, index)
+    public val invertIndices: IntProgression = size - 1 downTo 0
 
-    public fun row(index:Int):Vector = RowVector(this, index)
+    public fun column(index:Int): Vector = ColVector(this, index)
 
-    public fun eachRow(block:(Vector)->Unit) {
+    public fun row(index:Int): Vector = RowVector(this, index)
+
+    public fun eachRow(block: (Vector) -> Unit) {
         indices.forEach {
             block(row(it))
         }
     }
 
-    public fun eachColumn(block:(Vector)->Unit) {
+    public fun eachColumn(block: (Vector)->Unit) {
         indices.forEach {
             block(column(it))
         }
     }
 
-    public fun get(x:Int, y:Int):Int = matrix[x][y]
+    operator fun get(x: Int, y: Int): Int = matrix[x][y]
 
-    public fun set(x:Int, y:Int, value:Int) { matrix[x][y] = value }
+    operator fun set(x: Int, y: Int, value: Int) { matrix[x][y] = value }
 
-    public fun copy():Matrix = Matrix(size) { x, y -> this[x, y] }
+    public fun copy(): Matrix = Matrix(size) { x, y -> this[x, y] }
 
-    public fun setAll(builder:(Int, Int)->Int) {
+    public fun setAll(builder: (Int, Int) -> Int) {
         indices.forEach { x ->
             indices.forEach { y ->
                 set(x, y, builder(x, y))
@@ -70,25 +71,15 @@ public class Matrix(val size:Int, val builder:(Int, Int)->Int) {
         return result
     }
 
-    fun equals(other:Matrix):Boolean = allIndices { x, y ->
-        get(x, y) == other.get(x, y)
-    }
+    override operator fun equals(other: Any?) = other is Matrix && this[x, y] == other[x, y]
 
-    override fun equals(other: Any?): Boolean
-            = if(other is Matrix) equals(other) else false
-
-
-    override fun toString(): String {
-        val builder = StringBuilder()
-
+    override fun toString() = StringBuilder().apply {
         eachRow { row ->
-            builder.append("\n")
-            row.forEach { builder.append(it).append(" ") }
+            append("\n")
+            row.forEach { append("$it ") }
         }
 
-        builder.append("\n")
-
-        return builder.toString()
-    }
+        append("\n")
+    }.toString()
 }
 
